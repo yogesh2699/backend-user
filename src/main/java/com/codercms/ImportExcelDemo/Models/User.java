@@ -5,10 +5,10 @@ public class User {
 
   public String email;
 
-  public String password;
+ // public String password;
 
   public String contact;
-  //private int age;
+
 
   public String uniqueId;
   public User() {
@@ -38,13 +38,7 @@ public class User {
     this.email = email;
   }
 
-  public String getPassword() {
-    return password;
-  }
 
-  public void setPassword(String password) {
-    this.password = password;
-  }
 
   public String getContact() {
     return contact;
@@ -56,11 +50,11 @@ public class User {
 
 
 
-  public User(String username, String email, String password, String contact) {
+  public User(String username, String email, String contact) {
 
     this.username = username;
     this.email = email;
-    this.password = password;
+    //this.password = password;
     this.contact = contact;
   }
 
@@ -69,7 +63,6 @@ public class User {
     return "User{" +
             "username='" + username + '\'' +
             ", email='" + email + '\'' +
-            ", password='" + password + '\'' +
             ", contact='" + contact + '\'' +
             '}';
   }

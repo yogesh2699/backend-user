@@ -12,7 +12,7 @@ public class UserEntity {
 
     public String email;
 
-    public String password;
+   // public String password;
 
     public String contact;
 
