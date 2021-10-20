@@ -2,6 +2,7 @@ package com.codercms.ImportExcelDemo.Controllers;
 
 import com.codercms.ImportExcelDemo.Entities.UserEntity;
 import com.codercms.ImportExcelDemo.Exceptions.UserException;
+import com.codercms.ImportExcelDemo.Models.Message;
 import com.codercms.ImportExcelDemo.Models.User;
 import com.codercms.ImportExcelDemo.Repositories.UserRepository;
 import org.apache.poi.ss.usermodel.Cell;
@@ -30,68 +31,77 @@ public class TestController {
     @Autowired
     UserRepository userRepository;
 
-    public HashMap<User, List<String>> hm = new HashMap<>();
+    public HashMap<String, List<String>> hm = new HashMap<>();
 
     @PostMapping("/import-order-excel")
-    public List<User> importExcelFile(@RequestParam("file") MultipartFile files)throws IOException {
+    public ResponseEntity<Message> importExcelFile(@RequestParam("file") MultipartFile files) throws IOException {
 
-        List<User> users = new ArrayList<>();
-        XSSFWorkbook workbook = new XSSFWorkbook(files.getInputStream());
+        String message = "";
+        try {
+            List<User> users = new ArrayList<>();
+            XSSFWorkbook workbook = new XSSFWorkbook(files.getInputStream());
 
-        // Read user data form excel file sheet.
-        XSSFSheet worksheet = workbook.getSheetAt(0);
-        for (int index = 0; index < worksheet.getPhysicalNumberOfRows(); index++) {
-            if (index > 0) {
-                XSSFRow row = worksheet.getRow(index);
+            // Read user data form excel file sheet.
+            XSSFSheet worksheet = workbook.getSheetAt(0);
+            for (int index = 0; index < worksheet.getPhysicalNumberOfRows(); index++) {
+                if (index > 0) {
+                    XSSFRow row = worksheet.getRow(index);
 
-                 User user = new User();
+                    User user = new User();
 
 
-                 user.username = getCellValue(row, 0);
-                 user.email =  getCellValue(row, 1);
-                // user.password = getCellValue(row, 2);
-                 user.contact = getCellValue(row, 2);
-                 user.uniqueId = getCellValue(row, 3);
-                 if(isValidate(user).isEmpty()) {
-                     if (user.username != "" && user.email != "" && user.contact != "" && user.uniqueId != "") {
-                         users.add(user);
-                     }
-                 }else {
-                     List<String> exceptions = isValidate(user);
-                     hm.put(user, exceptions);
-                 }
+                    user.username = getCellValue(row, 0);
+                    user.email = getCellValue(row, 1);
+                    // user.password = getCellValue(row, 2);
+                    user.contact = getCellValue(row, 2);
+                    user.uniqueId = getCellValue(row, 3);
+                    if (isValidate(user).isEmpty()) {
+                        if (user.username != "" && user.email != "" && user.contact != "" && user.uniqueId != "") {
+                            users.add(user);
+                        }
+                    } else {
+                        List<String> exceptions = isValidate(user);
+                        hm.put(user.uniqueId, exceptions);
+                    }
+                }
             }
+
+            // Save to db.
+            List<UserEntity> entities = new ArrayList<>();
+            if (users.size() > 0) {
+                users.forEach(x -> {
+                    UserEntity entity = new UserEntity();
+
+                    entity.username = x.username;
+                    entity.email = x.email;
+                    //  entity.password =  x.password;
+                    entity.contact = x.contact;
+                    entity.uniqueId = x.uniqueId;
+                    System.out.println(x.uniqueId);
+                    entities.add(entity);
+                });
+
+
+                userRepository.saveAll(entities);
+                message = "file is uploaded successful";
+                message = message + System.lineSeparator() + hm;
+              //  return ResponseEntity.status(HttpStatus.OK).body(new Message(message));
+            }
+        } catch (Exception e) {
+            e.getStackTrace();
+            message = "file is not uploaded successful";
         }
-
-        // Save to db.
-        List<UserEntity> entities = new ArrayList<>();
-        if (users.size() > 0) {
-            users.forEach(x->{
-                UserEntity entity = new UserEntity();
-
-                entity.username = x.username;
-                entity.email =  x.email;
-              //  entity.password =  x.password;
-                entity.contact = x.contact;
-                entity.uniqueId = x.uniqueId;
-                System.out.println(x.uniqueId);
-                entities.add(entity);
-            });
-
-
-            userRepository.saveAll(entities);
-        }
-
-        return users;
+        return ResponseEntity.status(HttpStatus.OK).body(new Message(message));
     }
 
-    @GetMapping(value = "/notifications", produces = MediaType.APPLICATION_JSON_VALUE)
+
+    /*@GetMapping(value = "/notifications", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<HashMap<User, List<String>>> fetchAll() {
         HashMap<User, List<String>> list = hm;
 
         return new ResponseEntity<HashMap<User, List<String>>>(list, new HttpHeaders(),
                 HttpStatus.OK);
-    }
+    }*/
 
     public  static List<String> isValidate(User user)
     {
