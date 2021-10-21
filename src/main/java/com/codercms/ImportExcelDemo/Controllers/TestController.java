@@ -68,45 +68,44 @@ public class TestController {
 
             // take data from db and check values
             List<UserEntity> dbEntities =  userRepository.findAll();
-             boolean updated = false;
+            boolean updated = false;
                if(dbEntities.size() == users.size())
                {
-                   System.out.println("I am in ---- if");
+
                    for(int i = 0;i<dbEntities.size();i++)
                    {
-                       System.out.println("I am in ---- for");
-                       if(dbEntities.get(i).uniqueId == users.get(i).uniqueId
-                       && dbEntities.get(i).username == users.get(i).username
-                               && dbEntities.get(i).contact == users.get(i).contact
-                               && dbEntities.get(i).email == users.get(i).email
+                          updated = false;
+
+                       if(dbEntities.get(i).uniqueId.equals(users.get(i).uniqueId)
                        )
                            updated = true;
                    }
                }
-               System.out.println(updated);
+               //System.out.println(updated);
 
 
-              if(!updated){
-            // Save to db.
-            List<UserEntity> entities = new ArrayList<>();
-            if (users.size() > 0) {
-                users.forEach(x -> {
-                    UserEntity entity = new UserEntity();
+              if(!updated) {
+                  // Save to db.
+                  List<UserEntity> entities = new ArrayList<>();
+                  if (users.size() > 0) {
+                      users.forEach(x -> {
+                          UserEntity entity = new UserEntity();
 
-                    entity.username = x.username;
-                    entity.email = x.email;
-                    //  entity.password =  x.password;
-                    entity.contact = x.contact;
-                    entity.uniqueId = x.uniqueId;
-                    System.out.println(x.uniqueId);
-                    entities.add(entity);
-                });
+                          entity.username = x.username;
+                          entity.email = x.email;
+                          //  entity.password =  x.password;
+                          entity.contact = x.contact;
+                          entity.uniqueId = x.uniqueId;
+                          System.out.println(x.uniqueId);
+                          entities.add(entity);
+                      });
 
 
-                userRepository.saveAll(entities);
-                message = "file is uploaded successful";
-                message = message + System.lineSeparator() + hm;
-            }
+                      userRepository.saveAll(entities);
+                      message = "file is uploaded successful";
+                      message = message + System.lineSeparator() + hm;
+                  }
+              }
             else{
                 System.out.println("File is already updated");
                 message = "file contains same value";
@@ -114,7 +113,7 @@ public class TestController {
             }
 
               //  return ResponseEntity.status(HttpStatus.OK).body(new Message(message));
-            }
+
         } catch (Exception e) {
             e.getStackTrace();
             message = "file is not uploaded successful";
